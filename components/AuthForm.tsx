@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { createAccount } from "@/lib/actions/user.actions"
  
 
 type FormType="sign-in" |'sign-up'; //type of the page
@@ -31,7 +32,8 @@ const authFormSchema=(formType:FormType)=>{
 
 const AuthForm = ({ type }:{type:FormType}) => {
     const [isLoading, setIsLoading] = useState(false)
-    const [errorMessage, seterrorMessage] = useState("")
+    const [errorMessage, seterrorMessage] = useState("");
+    const [accountId, setAccountId] = useState(null);
 
     const formSchema=authFormSchema(type)
 
@@ -43,16 +45,34 @@ const AuthForm = ({ type }:{type:FormType}) => {
       email:"",
     },
   })
-  // 2. Define a submit handler.
+
   const onSubmit=async(values: z.infer<typeof formSchema>)=> {
-    console.log(values)
-  }
+
+    try {
+      setIsLoading(true);
+      const user= await createAccount({
+        fullName: values.fullName || "",
+        email: values.email,
+      })
+      setAccountId(user.accountId)
+    } catch (error) {
+      seterrorMessage("failed to create an account Please Try again later");
+      console.log(error)
+      
+    }
+    finally{
+      setIsLoading(false)
+    }
+    
+  };
+
+
   return (
     <>
     <Form {...form}>
     <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form">
         <h1 className="form-title">{type==="sign-in" ? 'Sign In' :"Sign Up"}</h1>
-        {type === 'sign-in' && 
+        {type === 'sign-up' && 
         <FormField
         control={form.control}
         name="fullName"
