@@ -35,11 +35,7 @@ const OTPModal = ({accountId,email}:{accountId:string;email:string}) => {
          try {
             // call api to verify the otp
             const sessionId=await verifysecret({accountId,password})
-            if(sessionId) router.push('/')
-
-
-
-            
+            if(sessionId) router.push('/') 
          } catch (error) {
             console.log("failed Tto Verify The OTP",error)
             

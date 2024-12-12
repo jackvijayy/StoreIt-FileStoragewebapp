@@ -1,10 +1,11 @@
 "use server"
 
 import { ID, Query } from "node-appwrite";
-import { createAdminClient } from "../appwrite";
+import { createAdminClient, createSessionClient,  } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
+import { avatarPlaceholder } from "@/constants";
 
 
 
@@ -57,8 +58,8 @@ const handlError=(error:unknown,message:string)=>{
             ID.unique(),{
                 fullName,
                 email,
-                avatar:"https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Favatar-icon-placeholder-facebook-1577909%2F&psig=AOvVaw0OFO6P3ULPVUBllQIHqv5V&ust=1733917162338000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCPip-IePnYoDFQAAAAAdAAAAABAE",
-                accountId
+                avatar:avatarPlaceholder,
+                accountId,
             }
         )
     }
@@ -85,5 +86,22 @@ export const verifysecret=async({accountId,password}:{accountId:string;password:
         handlError(error,"failed to verify the OTP")
         
     }
+
+}
+
+export const getCurrentuser=async()=>{
+    const {account,databases}=await createSessionClient();
+    const result=await account.get();
+
+    const user=await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.usersCollectionId,
+        [Query.equal('accountId',[result.$id])]
+
+    )
+    if(user.total <= 0) return null
+
+    return parseStringify(user.documents[0])
+
 
 }
