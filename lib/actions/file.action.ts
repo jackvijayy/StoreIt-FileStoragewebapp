@@ -4,10 +4,11 @@ import { uploadFileProps } from "@/types"
 import { createAdminClient } from "../appwrite"
 import {InputFile} from"node-appwrite/file"
 import { appwriteConfig } from "../appwrite/config"
-import { ID } from "node-appwrite"
+import { ID, Models, Query } from "node-appwrite"
 import { constructFileUrl, getFileType, parseStringify } from "../utils"
-import { error } from "console"
 import { revalidatePath } from "next/cache"
+import { getCurrentuser } from "./user.actions"
+import { list } from "postcss"
 
 const handlError=(error:unknown,message:string)=>{
     console.log(error,message);
@@ -24,15 +25,16 @@ export const uploadFile= async ({file,ownerId,accountId,path}:uploadFileProps)=>
             ID.unique(),
             inputFile
         )
+        
         const fileDocument={
             type:getFileType(bucketFile.name).type,
             name:bucketFile.name,
             url:constructFileUrl(bucketFile.$id),
             extension:getFileType(bucketFile.name).extension,
-            size:bucketFile.sizeOriginal,
+            size:255,
             owner:ownerId,
             accountId,
-            user:[],
+            // user:[],
             bucketFileId:bucketFile.$id,
         };
 
@@ -54,5 +56,41 @@ export const uploadFile= async ({file,ownerId,accountId,path}:uploadFileProps)=>
         handlError(error,"faile to Upload Files")
         
     }
+
+}
+
+const createQueries=(currentUser:Models.Document)=>{
+    const queries=[
+        Query.or([
+            Query.equal('owner',[currentUser.$id]),
+            Query.contains('users',[currentUser.email])
+        ])
+    ]
+
+   return queries
+};
+
+export const getFiles=async()=>{
+    const {  databases }= await createAdminClient();
+    try {
+        const currentUser=await getCurrentuser();
+        console.log(currentUser)
+        if(!currentUser) throw new Error('user Not Found');
+        const queries=createQueries(currentUser);
+        console.log(currentUser,queries)
+        const files=await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            queries
+
+        )
+        console.log(files)
+        return parseStringify(files)
+        
+    } catch (error) {
+        handlError(error,"Failed to get files")
+        
+    }
+
 
 }
