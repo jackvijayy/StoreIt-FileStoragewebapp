@@ -12,7 +12,7 @@ const Crad = ({file}:{file:Models.Document}) => {
         <div className='flex justify-between'>
             <Thumbnail type={file.type} extension={file.extension} url={file.url}
             className='size-20' imageClassName='!size-11'/>
-            <div className='flex flex-col items-end justify-center'>
+            <div className='flex flex-col items-end justify-center z-50'>
                 <ActionDropdown file={file}/>
                 <p className='body-1'>
                     {convertFileSize(file.size)}
