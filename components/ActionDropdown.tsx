@@ -4,11 +4,9 @@ import React, { useState } from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -25,10 +23,10 @@ import Link from 'next/link'
 import { constructDownloadUrl } from '@/lib/utils'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { renameFile } from '@/lib/actions/file.action'
+import { deleteFile, renameFile, updateFileUsers } from '@/lib/actions/file.action'
 import { usePathname } from 'next/navigation'
-import { FileDetails } from './ActionsModelsContent'
-// import { DialogContent } from '@radix-ui/react-dialog'
+import { FileDetails, ShareInput } from './ActionsModelsContent'
+
 
 const ActionDropdown = ({file}:{file:Models.Document}) => {
   const [isModelOpen, setisModelOpen] = useState(false);
@@ -36,6 +34,7 @@ const ActionDropdown = ({file}:{file:Models.Document}) => {
   const [action,setAction]=useState<ActionType | null>(null);
   const[name,setname]=useState(file.name);;
   const[isLoading,setIsLoading]=useState(false);
+  const [emails,setEmails]=useState([])
   const path=usePathname();
 
   const closeAllModel=()=>{
@@ -52,16 +51,25 @@ const ActionDropdown = ({file}:{file:Models.Document}) => {
     let success=false;
     const actions={
       rename:()=>renameFile({fileId:file.$id,name,extension:file.extension,path}),
-      share:()=>console.log("share"),
-      delete:()=>console.log("delete"),
+      share:()=>updateFileUsers({fileId:file.$id,emails,path}),
+      delete:()=>deleteFile({fileId:file.$id,path,bucketFileId:file.bucketFileId})
   };
   success=await actions[action.value as keyof typeof actions]();
 
   if(success) closeAllModel();
   setIsLoading(false)
+  };
 
+  const handleRemoveUser=async(email:string)=>{
+    const updatedEmails=emails.filter((e)=>e !==email);
+    const success=await updateFileUsers({
+      fileId:file.$id,
+      emails:updatedEmails,
+      path,
+    })
+    if(success) setEmails(updatedEmails);
+    closeAllModel()
 
-    
 
   };
 
@@ -77,9 +85,19 @@ const ActionDropdown = ({file}:{file:Models.Document}) => {
           {value==='rename' && <Input type="text"
            value={name}
            onChange={(e)=>setname(e.target.value)}/>}
-           {value && 'details' && <FileDetails file={file}/>}
 
-       
+           {value==='share' && (<ShareInput file={file} onInputChange={setEmails}
+           onRemove={handleRemoveUser}/>)}
+
+           {value === 'details' && <FileDetails file={file}/>}
+           {value === 'delete' && (
+            <p className='delete-confirmation'>
+              Are You Sure to Delete {''}
+              <span className='delete-file-name'>{file.name}</span>?
+
+            </p>
+           )}
+
       </DialogHeader>
       {['rename','delete','share'].includes(value)&&(
         <DialogFooter className='flex flex-col gap-3 md:flex-row'>
@@ -90,7 +108,7 @@ const ActionDropdown = ({file}:{file:Models.Document}) => {
             <p className='capitalize'>{value}</p>
             {isLoading && (
               <Image
-              src="assest/icons/loader.svg"
+              src="assets/icons/loader.svg"
               alt='loader'
               width={24}
               height={24}

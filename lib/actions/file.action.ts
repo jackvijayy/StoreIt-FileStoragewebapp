@@ -8,14 +8,12 @@ import { ID, Models, Query } from "node-appwrite"
 import { constructFileUrl, getFileType, parseStringify } from "../utils"
 import { revalidatePath } from "next/cache"
 import { getCurrentuser } from "./user.actions"
-import { list } from "postcss"
 
 const handlError=(error:unknown,message:string)=>{
     console.log(error,message);
     throw error
 
 }
-
 export const uploadFile= async ({file,ownerId,accountId,path}:uploadFileProps)=>{
     const {storage,databases}=await createAdminClient();
     try {
@@ -58,7 +56,6 @@ export const uploadFile= async ({file,ownerId,accountId,path}:uploadFileProps)=>
     }
 
 }
-
 const createQueries=(currentUser:Models.Document)=>{
     const queries=[
         Query.or([
@@ -115,7 +112,48 @@ export const getFiles=async()=>{
         handlError(error,"Failed To Rename the File")
         
     }
+}
 
+export const updateFileUsers= async({fileId,emails,path}:UpdateFileUsersProps)=>{
+    const {databases}= await createAdminClient();
+    try {
+       
+        const updateFile=await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            fileId,
+            {
+                users:emails,
+            }
+        );
+        revalidatePath(path);
+        return parseStringify(updateFile);
 
+        
+    } catch (error) {
+        handlError(error,"Failed To Rename the File")
+        
+    }
+}
 
+export const deleteFile= async({fileId,bucketFileId,path}:DeleteFileProps)=>{
+    const {databases,storage}= await createAdminClient();
+    try {
+       
+        const deletedFile=await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            fileId,
+        );
+        if(deletedFile){
+            await storage.deleteFile(appwriteConfig.bucketId,bucketFileId)
+        }
+        revalidatePath(path);
+        return parseStringify({status:"success"});
+
+        
+    } catch (error) {
+        handlError(error,"Failed To Rename the File")
+        
+    }
 }
