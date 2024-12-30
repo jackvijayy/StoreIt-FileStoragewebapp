@@ -56,8 +56,8 @@ interface Props {
         <Input
         type='email'
         placeholder='Enter email address'
-        onChange={(e) => onInputChange((prevEmails) => [...prevEmails, ...e.target.value.trim().split(',')])}
-        // onChange={(e)=>onInputChange(e.target.value.trim().split(','))}
+        // onChange={(e) => onInputChange((prevEmails) => [...prevEmails, ...e.target.value.trim().split(',')])}
+        onChange={(e)=>onInputChange(e.target.value.trim().split(','))}
         className='share-input-field'
         />
         <div className='pt-4'>
