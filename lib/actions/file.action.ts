@@ -1,6 +1,6 @@
 'use server'
 
-import { uploadFileProps } from "@/types"
+// import { uploadFileProps } from "@/types"
 import { createAdminClient, createSessionClient } from "../appwrite"
 import {InputFile} from"node-appwrite/file"
 import { appwriteConfig } from "../appwrite/config"
@@ -14,7 +14,7 @@ const handlError=(error:unknown,message:string)=>{
     throw error
 
 }
-export const uploadFile= async ({file,ownerId,accountId,path}:uploadFileProps)=>{
+export const uploadFile= async ({file,ownerId,accountId,path}:UploadFileProps)=>{
     const {storage,databases}=await createAdminClient();
     try {
         const inputFile=InputFile.fromBuffer(file,file.name);
