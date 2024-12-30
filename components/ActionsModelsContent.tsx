@@ -42,13 +42,12 @@ const DetailRow=({label,value}:{label:string;value:string})=>(
 }
 
 
-interface props{
-    file:Models.Document;
-    onInputChange:React.Dispatch<React.SetStateAction<string[]>>;
-    onRemove:(email:string)=>void;
-
+interface Props {
+    file: Models.Document;
+    onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
+    onRemove: (email: string) => void;
 }
- export const ShareInput = ({file,onInputChange,onRemove}:props) => {
+ export const ShareInput = ({file,onInputChange,onRemove}:Props) => {
   return (
     <>
     <ImageThumbnail file={file}/>

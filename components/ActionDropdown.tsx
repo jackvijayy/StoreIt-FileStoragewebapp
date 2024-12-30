@@ -34,7 +34,8 @@ const ActionDropdown = ({file}:{file:Models.Document}) => {
   const [action,setAction]=useState<ActionType | null>(null);
   const[name,setname]=useState(file.name);;
   const[isLoading,setIsLoading]=useState(false);
-  const [emails,setEmails]=useState([])
+  // const [emails,setEmails]=useState<String([])
+  const [emails, setEmails] = useState<string[]>([]);
   const path=usePathname();
 
   const closeAllModel=()=>{
