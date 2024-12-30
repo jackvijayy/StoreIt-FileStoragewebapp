@@ -44,7 +44,7 @@ const DetailRow=({label,value}:{label:string;value:string})=>(
 
 interface Props {
     file: Models.Document;
-    onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
+    onInputChange:React.Dispatch<React.SetStateAction<string[]>>;
     onRemove: (email: string) => void;
 }
  export const ShareInput = ({file,onInputChange,onRemove}:Props) => {
@@ -56,7 +56,8 @@ interface Props {
         <Input
         type='email'
         placeholder='Enter email address'
-        onChange={(e)=>onInputChange(e.target.value.trim().split(','))}
+        onChange={(e) => onInputChange((prevEmails) => [...prevEmails, ...e.target.value.trim().split(',')])}
+        // onChange={(e)=>onInputChange(e.target.value.trim().split(','))}
         className='share-input-field'
         />
         <div className='pt-4'>
